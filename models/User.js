@@ -1,8 +1,13 @@
+const bcrypt = require('bcrypt');
 const { MOdel, DataTypes } = require('sequlize');
 const sequlize = require('../config/connection');
 
 // create User model
-class User extends Model { }
+class User extends Model {
+    checkPassword(loginPw) {
+        return bcrypt.compareSync(loginPw, this.password);
+    }
+}
 
 // define table columns and configuration
 User.init(
@@ -18,6 +23,15 @@ User.init(
         username: {
             type: DataTypes.STRING,
             allowNull: false
+        },
+        // define an email column
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+            validate: {
+                isEmail: true
+            }
         },
         // defines a password column
         password: {
@@ -35,7 +49,7 @@ User.init(
                 newUserData.password = await bcrypt.hash(newUserData.password, 10);
                 return newUserData;
             },
-
+            // set up beforeUpdate lifecycle "hook" functionality
             async beforeUpdate(updatedUserData) {
                 updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
                 return updatedUserData;
