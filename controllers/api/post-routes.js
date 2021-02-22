@@ -1,21 +1,19 @@
 const router = require('express').Router();
+const sequelize = require('../../config/connection');
 const { Post, User, Comment } = require('../../models');
-const { sequelize } = require('../../models/Post');
+const withAuth = require('../../utils/auth');
 
-// get all posts
+// get all users
 router.get('/', (req, res) => {
     console.log('======================');
     Post.findAll({
-        attributes: ['id', 'title', 'username', 'created_at'],
-        order: [['created_at', 'DESC']],
         attributes: [
             'id',
             'title',
             'username',
-            'created_at',
+            'created_at'
         ],
         include: [
-            // include Comment model
             {
                 model: Comment,
                 attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
@@ -37,7 +35,6 @@ router.get('/', (req, res) => {
         });
 });
 
-// get single post
 router.get('/:id', (req, res) => {
     Post.findOne({
         where: {
@@ -46,8 +43,8 @@ router.get('/:id', (req, res) => {
         attributes: [
             'id',
             'title',
-            'uername',
-            'created_at',
+            'username',
+            'created_at'
         ],
         include: [
             {
@@ -77,11 +74,11 @@ router.get('/:id', (req, res) => {
         });
 });
 
-// create a post
-router.post('/', (req, res) => {
+router.post('/', withAuth, (req, res) => {
     Post.create({
         title: req.body.title,
-        user_id: req.body.user_id
+        username: req.body.username,
+        user_id: req.session.user_id
     })
         .then(dbPostData => res.json(dbPostData))
         .catch(err => {
@@ -90,8 +87,7 @@ router.post('/', (req, res) => {
         });
 });
 
-// update a post's title
-router.put('/:id', (req, res) => {
+router.put('/:id', withAuth, (req, res) => {
     Post.update(
         {
             title: req.body.title
@@ -115,8 +111,8 @@ router.put('/:id', (req, res) => {
         });
 });
 
-// delete a post
-router.destroy('/:id', (req, res) => {
+router.delete('/:id', withAuth, (req, res) => {
+    console.log('id', req.params.id);
     Post.destroy({
         where: {
             id: req.params.id
