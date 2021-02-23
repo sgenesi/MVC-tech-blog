@@ -1,8 +1,10 @@
 const router = require('express').Router();
 const { User, Post, Comment } = require('../../models');
+const withAuth = require('../../utils/auth');
 
-// get all users
+// GET /api/users
 router.get('/', (req, res) => {
+    // Access our User model and run .findAll() method
     User.findAll({
         attributes: { exclude: ['password'] }
     })
@@ -13,6 +15,7 @@ router.get('/', (req, res) => {
         });
 });
 
+// GET /api/users/1
 router.get('/:id', (req, res) => {
     User.findOne({
         attributes: { exclude: ['password'] },
@@ -22,7 +25,7 @@ router.get('/:id', (req, res) => {
         include: [
             {
                 model: Post,
-                attributes: ['id', 'title', 'post_url', 'created_at']
+                attributes: ['id', 'title', 'post_content', 'created_at']
             },
             {
                 model: Comment,
@@ -31,12 +34,9 @@ router.get('/:id', (req, res) => {
                     model: Post,
                     attributes: ['title']
                 }
-            },
-            {
-                model: Post,
-                attributes: ['title'],
             }
         ]
+
     })
         .then(dbUserData => {
             if (!dbUserData) {
@@ -51,30 +51,30 @@ router.get('/:id', (req, res) => {
         });
 });
 
+// POST /api/users
 router.post('/', (req, res) => {
-    // expects {username: 'Lernantino', email: 'lernantino@gmail.com', password: 'password1234'}
     User.create({
         username: req.body.username,
         email: req.body.email,
-        password: req.body.password
+        password: req.body.password,
+        twitter: req.body.twitter,
+        github: req.body.github
     })
         .then(dbUserData => {
             req.session.save(() => {
                 req.session.user_id = dbUserData.id;
                 req.session.username = dbUserData.username;
+                req.session.twitter = dbUserData.twitter;
+                req.session.github = dbUserData.github;
                 req.session.loggedIn = true;
 
                 res.json(dbUserData);
             });
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).json(err);
         });
 });
 
+// LOGIN
 router.post('/login', (req, res) => {
-    // expects {email: 'lernantino@gmail.com', password: 'password1234'}
     User.findOne({
         where: {
             email: req.body.email
@@ -93,8 +93,11 @@ router.post('/login', (req, res) => {
         }
 
         req.session.save(() => {
+            // declare session variables
             req.session.user_id = dbUserData.id;
             req.session.username = dbUserData.username;
+            req.session.twitter = dbUserData.twitter;
+            req.session.github = dbUserData.github;
             req.session.loggedIn = true;
 
             res.json({ user: dbUserData, message: 'You are now logged in!' });
@@ -102,20 +105,20 @@ router.post('/login', (req, res) => {
     });
 });
 
+
 router.post('/logout', (req, res) => {
     if (req.session.loggedIn) {
         req.session.destroy(() => {
             res.status(204).end();
         });
-    } else {
+    }
+    else {
         res.status(404).end();
     }
 });
 
-router.put('/:id', (req, res) => {
-    // expects {username: 'Lernantino', email: 'lernantino@gmail.com', password: 'password1234'}
-
-    // pass in req.body instead to only update what's passed through
+// PUT /api/users/1
+router.put('/:id', withAuth, (req, res) => {
     User.update(req.body, {
         individualHooks: true,
         where: {
@@ -123,7 +126,7 @@ router.put('/:id', (req, res) => {
         }
     })
         .then(dbUserData => {
-            if (!dbUserData) {
+            if (!dbUserData[0]) {
                 res.status(404).json({ message: 'No user found with this id' });
                 return;
             }
@@ -135,7 +138,8 @@ router.put('/:id', (req, res) => {
         });
 });
 
-router.delete('/:id', (req, res) => {
+// DELETE /api/users/1
+router.delete('/:id', withAuth, (req, res) => {
     User.destroy({
         where: {
             id: req.params.id
