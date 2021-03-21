@@ -118,7 +118,7 @@ DB_PW='your sequelize password'
 ---
 ## Links
 * Deployed Application: https://stark-headland-66540.herokuapp.com 
-* GitHub Repo: https://github.com/sgenesi/ecommerce-back-end
+* GitHub Repo: https://github.com/sgenesi/MVC-tech-blog
 
 ---
 ## Images
