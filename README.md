@@ -9,6 +9,7 @@ The Tech Blog is a CMS-style blog site where developers can publish their blog p
 * [Built With](#built-with)
 * [Installation](#installation)
 * [Links](#links)
+* [Images](#images)
 
 ---
 ## User Story and Acceptance Criteria
@@ -120,3 +121,19 @@ DB_PW='your sequelize password'
 * GitHub Repo: https://github.com/sgenesi/ecommerce-back-end
 
 ---
+## Images
+
+### Desktop View
+
+1440px X 1112px
+
+
+### iPad View
+
+768px X 1024px
+
+
+### iPhone 6 View
+
+375px X 667px
+
