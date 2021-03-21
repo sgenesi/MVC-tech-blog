@@ -168,7 +168,6 @@ Homepage:
 Dashboard:
 ![image](https://user-images.githubusercontent.com/71858457/111890941-dfb0f680-89b3-11eb-9bdf-b6a20e374bd1.png)
 
-
 Create Post:
 ![image](https://user-images.githubusercontent.com/71858457/111890942-e2135080-89b3-11eb-9373-8282204589d6.png)
 
